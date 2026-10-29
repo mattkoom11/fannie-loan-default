@@ -3,9 +3,10 @@
 The files are pipe-delimited with no header row. Only the fields this project
 uses are listed, by 0-based column position.
 
-UNVERIFIED: positions were written from memory of Fannie Mae's file layout.
-Check every one against crt-file-layout-and-glossary.xlsx before trusting a
-real-data build, and record the glossary version here.
+Verified 2026-10-28 against the Primary files themselves (113 columns per row;
+2015Q1-2017Q4 downloaded from Data Dynamics that day): each position checked
+on real rows for type and range, e.g. MI_PCT=30.00 on a 95% LTV loan and
+CSCORE_C present only when NUM_BO=2. Not yet cross-checked with the glossary.
 """
 
 FIELDS: dict[str, int] = {

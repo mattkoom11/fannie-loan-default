@@ -4,7 +4,7 @@ import pytest
 
 from fannie_default.layout import FIELDS
 
-N_COLUMNS = 108
+N_COLUMNS = 113
 
 
 def write_raw(path: Path, rows: list[dict]) -> Path:
