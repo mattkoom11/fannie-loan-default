@@ -158,8 +158,8 @@ Tasks 1–2 don't need the data; Task 3's real-data step does.
 - Produces: `logistic() -> Pipeline`, `random_forest() -> Pipeline`, `boosting() -> Pipeline`. Each takes the raw `X` from `out_of_time_split` and supports `predict_proba`.
 
 - [ ] **Step 1:** `logistic()`: `scale=True`, `LogisticRegression(class_weight="balanced", max_iter=2000)`. Test `test_model_fits_and_scores[logistic]` on a 2,000-row synthetic frame where default depends on `CSCORE_B`: probabilities in [0, 1] and AUC > 0.7. Run → PASS. Commit.
-- [ ] **Gate A (Matthew):** `teach` session on random forests, bagging, OOB error and variable importance, with the quiz passed. Lesson log under `wiki/concepts/classes/stat-4630/sessions/`.
-- [ ] **Step 2:** `random_forest()`: `scale=False`, `RandomForestClassifier(n_estimators=500, min_samples_leaf=50, class_weight="balanced_subsample", oob_score=True, n_jobs=-1, random_state=42)`. Same parametrized test. Commit.
+- [x] **Gate A (Matthew):** `teach` session on random forests, bagging, OOB error and variable importance, with the quiz passed. Lesson log under `wiki/concepts/classes/stat-4630/sessions/`. *2026-10-29: Matthew chose to learn these while building instead; the explainability check in Task 8 Step 2 still applies.*
+- [x] **Step 2:** `random_forest()`: `scale=False`, `RandomForestClassifier(n_estimators=500, min_samples_leaf=50, class_weight="balanced_subsample", oob_score=True, n_jobs=-1, random_state=42)`. Same parametrized test. Commit. *Added `evaluate.oob_score`, because sklearn's `oob_score_` is accuracy and a custom `oob_score` callable receives labels, not probabilities.*
 - [ ] **Gate B (Matthew):** `teach` session on gradient boosting (learning rate, number of trees, early stopping; how it differs from random forests).
 - [ ] **Step 3:** `boosting()`: `scale=False`, `LGBMClassifier(n_estimators=2000, learning_rate=0.03, num_leaves=31, min_child_samples=200, subsample=0.8, subsample_freq=1, colsample_bytree=0.8, random_state=42, verbose=-1)`. Early stopping on a 2016Q4 validation slice happens in the notebook, not the factory. Same test. Commit `feat: random forest and boosting models`.
 
