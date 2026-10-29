@@ -40,3 +40,8 @@ DATE_FIELDS = ("ACT_PERIOD", "ORIG_DATE", "FIRST_PAY")
 ORIGINATION_FIELDS: tuple[str, ...] = tuple(
     name for name in FIELDS if name not in ("LOAN_ID", "ACT_PERIOD", "DLQ_STATUS", "Zero_Bal_Code")
 )
+
+NUMERIC_FIELDS: tuple[str, ...] = (
+    "ORIG_RATE", "ORIG_UPB", "ORIG_TERM", "OLTV", "OCLTV",
+    "NUM_BO", "DTI", "CSCORE_B", "CSCORE_C", "MI_PCT",
+)
