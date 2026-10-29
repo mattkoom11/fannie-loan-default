@@ -16,7 +16,7 @@
 - Raw and processed data are **never committed**; the terms of use forbid redistributing them. `data/` is gitignored. The test fixtures are synthetic.
 - Use a subset, not the full files: the default loan sample rate is `0.10`.
 - Origination vintages: `2015Q1`–`2017Q4`. Train on `2015Q1`–`2016Q4`; the out-of-time test set is `2017Q1`–`2017Q4`.
-- The label `default_24m` is 1 if, within the first 24 months after the first payment date, the loan is ever 90+ days delinquent (`DLQ_STATUS >= 3`) or ends with zero-balance code `02`, `03`, `09` or `15`.
+- The label `default_24m` is 1 if, within the first 24 months after the first payment date, the loan is ever 180+ days delinquent (`DLQ_STATUS >= 6`; changed from 90+ on 2026-10-28 by Matthew, after the first real build showed 2017 hurricane forbearance inflating 90-day delinquency in FL/TX) or ends with zero-balance code `02`, `03`, `09` or `15`.
 - Features come from **origination fields only**. No performance-period field may become a feature.
 - Random seed `42` everywhere.
 - Models: logistic regression baseline, then random forest, then LightGBM. Compare them on ROC AUC and PR AUC, plus a cost-based threshold.
