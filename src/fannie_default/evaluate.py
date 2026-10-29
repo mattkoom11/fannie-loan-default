@@ -20,6 +20,19 @@ def score(y, p) -> dict:
     }
 
 
+# Harvey (TX, Aug 2017) and Irma (FL, Sep 2017) forbearance reaches 180+ days
+# delinquent for 2016-2017 vintages, an event origination data can't predict.
+STORM_STATES = ("FL", "TX")
+
+
+def score_robust(y, p, states) -> dict:
+    """score() on all loans and on loans outside STORM_STATES; a model ranking that
+    holds in both is not just learning the hurricanes."""
+    y, p, states = np.asarray(y), np.asarray(p), np.asarray(states)
+    keep = ~np.isin(states, STORM_STATES)
+    return {"all": score(y, p), "excl_storm_states": score(y[keep], p[keep])}
+
+
 def cost_threshold(y, p, cost_fn: float, cost_fp: float) -> tuple[float, float]:
     """The threshold t (flag loans with p >= t) that minimizes cost_fn*FN + cost_fp*FP.
 

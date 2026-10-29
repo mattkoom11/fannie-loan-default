@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 
 from fannie_default import models
-from fannie_default.evaluate import cost_threshold, importance, score
+from fannie_default.evaluate import STORM_STATES, cost_threshold, importance, score, score_robust
 from fannie_default.features import out_of_time_split
 
 Y = np.array([0, 0, 1, 0, 1, 1])
@@ -42,3 +42,14 @@ def test_importance_ranks_credit_score_first(loans):
     assert imp.index[0] == "CSCORE_B"
     assert set(imp.index) == set(X_test.columns)
     assert imp.is_monotonic_decreasing
+
+
+def test_score_robust_excludes_storm_states():
+    y = np.array([0, 1, 0, 1, 0, 1, 0, 1])
+    p = np.array([0.1, 0.9, 0.2, 0.8, 0.9, 0.1, 0.3, 0.7])
+    states = np.array(["VA", "VA", "CA", "CA", "FL", "FL", "TX", "TX"])
+    result = score_robust(y, p, states)
+    assert set(result) == {"all", "excl_storm_states"}
+    assert result["excl_storm_states"]["roc_auc"] == pytest.approx(1.0)  # FL rows are the misranked ones
+    assert result["all"]["roc_auc"] < 1.0
+    assert set(STORM_STATES) == {"FL", "TX"}
