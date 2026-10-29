@@ -2,7 +2,7 @@ import random
 
 import pandas as pd
 
-from fannie_default.build import quarter_files
+from fannie_default.build import in_vintages, quarter_files
 from fannie_default.labels import build_loans
 from fannie_default.load import read_quarter
 
@@ -35,13 +35,20 @@ def label(raw_quarter_file, rows):
     return loans.set_index("LOAN_ID")
 
 
-def test_90_day_delinquency_is_default(raw_quarter_file):
-    loans = label(raw_quarter_file, history("1", 36, dlq={8: "1", 9: "2", 10: "3"}))
+def test_180_day_delinquency_is_default(raw_quarter_file):
+    dlq = {k: f"{k - 7:02d}" for k in range(8, 14)}  # 01..06 in months 8-13
+    loans = label(raw_quarter_file, history("1", 36, dlq=dlq))
     assert loans.loc["1", "default_24m"] == 1
 
 
+def test_cured_90_day_delinquency_is_not_default(raw_quarter_file):
+    # A disaster-forbearance pattern: 90 days late, then back to current.
+    loans = label(raw_quarter_file, history("1", 36, dlq={8: "01", 9: "02", 10: "03", 11: "00"}))
+    assert loans.loc["1", "default_24m"] == 0
+
+
 def test_late_delinquency_outside_window(raw_quarter_file):
-    loans = label(raw_quarter_file, history("1", 36, dlq={30: "3"}))
+    loans = label(raw_quarter_file, history("1", 36, dlq={30: "06"}))
     assert loans.loc["1", "default_24m"] == 0
 
 
@@ -85,3 +92,9 @@ def test_one_row_per_loan_with_vintage(raw_quarter_file):
 def test_quarter_files(tmp_path):
     files = quarter_files(tmp_path, "2015Q3", "2016Q2")
     assert [f.name for f in files] == ["2015Q3.csv", "2015Q4.csv", "2016Q1.csv", "2016Q2.csv"]
+
+
+def test_in_vintages_keeps_only_the_range():
+    loans = pd.DataFrame({"vintage": pd.PeriodIndex(["2014Q4", "2015Q1", "2017Q4", "2018Q1"], freq="Q")})
+    kept = in_vintages(loans, "2015Q1", "2017Q4")
+    assert kept["vintage"].astype(str).tolist() == ["2015Q1", "2017Q4"]

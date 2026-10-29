@@ -17,6 +17,14 @@ def quarter_files(raw: Path, start: str, end: str) -> list[Path]:
     return [raw / f"{q.year}Q{q.quarter}.csv" for q in pd.period_range(start, end, freq="Q")]
 
 
+def in_vintages(loans: pd.DataFrame, start: str, end: str) -> pd.DataFrame:
+    """Keep loans originated in [start, end]. Acquisition files also hold a few seasoned
+    loans originated earlier, and the last vintage is partial because some of its loans
+    are acquired in the following quarter."""
+    vintage = loans["vintage"]
+    return loans[(vintage >= pd.Period(start, "Q")) & (vintage <= pd.Period(end, "Q"))]
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--raw", type=Path, default=Path("data/raw"))
@@ -32,7 +40,7 @@ def main() -> None:
         loans = build_loans(read_quarter(path, args.rate))
         print(f"{path.name}: {len(loans):,} loans, default rate {loans['default_24m'].mean():.3%}")
         parts.append(loans)
-    loans = pd.concat(parts, ignore_index=True)
+    loans = in_vintages(pd.concat(parts, ignore_index=True), *args.quarters)
 
     args.out.parent.mkdir(parents=True, exist_ok=True)
     loans.to_parquet(args.out, index=False)
