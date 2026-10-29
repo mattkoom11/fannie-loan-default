@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 
 from fannie_default import models
-from fannie_default.evaluate import STORM_STATES, cost_threshold, importance, score, score_robust
+from fannie_default.evaluate import STORM_STATES, cost_threshold, importance, oob_score, score, score_robust
 from fannie_default.features import out_of_time_split
 
 Y = np.array([0, 0, 1, 0, 1, 1])
@@ -53,3 +53,13 @@ def test_score_robust_excludes_storm_states():
     assert result["excl_storm_states"]["roc_auc"] == pytest.approx(1.0)  # FL rows are the misranked ones
     assert result["all"]["roc_auc"] < 1.0
     assert set(STORM_STATES) == {"FL", "TX"}
+
+
+def test_oob_score_ranks_like_test(loans):
+    X_train, X_test, y_train, y_test = out_of_time_split(loans)
+    model = models.random_forest().fit(X_train, y_train)
+    oob = oob_score(model, y_train)
+    assert set(oob) == {"roc_auc", "pr_auc", "brier", "base_rate"}
+    assert oob["base_rate"] == pytest.approx(y_train.mean())
+    assert oob["roc_auc"] > 0.7
+    assert abs(oob["roc_auc"] - score(y_test, model.predict_proba(X_test)[:, 1])["roc_auc"]) < 0.1

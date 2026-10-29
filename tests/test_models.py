@@ -4,8 +4,8 @@ from sklearn.metrics import roc_auc_score
 from fannie_default import models
 from fannie_default.features import out_of_time_split
 
-# random_forest and boosting join this list after learning gates A and B.
-FACTORIES = ["logistic"]
+# boosting joins this list after learning gate B.
+FACTORIES = ["logistic", "random_forest"]
 
 
 @pytest.mark.parametrize("name", FACTORIES)

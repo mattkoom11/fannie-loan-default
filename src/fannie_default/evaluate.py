@@ -20,6 +20,18 @@ def score(y, p) -> dict:
     }
 
 
+def oob_score(model, y) -> dict:
+    """score() on a fitted random forest's out-of-bag predictions for its training rows.
+
+    Each tree skips about a third of the rows in its bootstrap sample, so every
+    training loan is scored only by trees that never saw it. sklearn's oob_score_
+    reports accuracy, which is about 99.8% here for any model that flags nobody.
+    """
+    p = model[-1].oob_decision_function_[:, 1]
+    seen = ~np.isnan(p)  # a row left out of no tree has no OOB prediction
+    return score(np.asarray(y)[seen], p[seen])
+
+
 # Harvey (TX, Aug 2017) and Irma (FL, Sep 2017) forbearance reaches 180+ days
 # delinquent for 2016-2017 vintages, an event origination data can't predict.
 STORM_STATES = ("FL", "TX")
