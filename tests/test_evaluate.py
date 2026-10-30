@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 
 from fannie_default import models
-from fannie_default.evaluate import STORM_STATES, cost_threshold, importance, oob_score, score, score_robust
+from fannie_default.evaluate import STORM_STATES, apply_threshold, bayes_threshold, cost_threshold, importance, oob_score, score, score_robust
 from fannie_default.features import out_of_time_split
 
 Y = np.array([0, 0, 1, 0, 1, 1])
@@ -63,3 +63,22 @@ def test_oob_score_ranks_like_test(loans):
     assert oob["base_rate"] == pytest.approx(y_train.mean())
     assert oob["roc_auc"] > 0.7
     assert abs(oob["roc_auc"] - score(y_test, model.predict_proba(X_test)[:, 1])["roc_auc"]) < 0.1
+
+
+def test_bayes_threshold():
+    assert bayes_threshold(cost_fn=100, cost_fp=1) == pytest.approx(1 / 101)
+    assert bayes_threshold(cost_fn=1, cost_fp=1) == pytest.approx(0.5)
+
+
+def test_apply_threshold_matches_hand_count():
+    # Flag p >= 0.4: rows 3-5 flagged; catches 2 of 3 defaults, 1 false alarm, 1 miss.
+    result = apply_threshold(Y, P, 0.4, cost_fn=2, cost_fp=1)
+    assert result["flagged"] == pytest.approx(3 / 6)
+    assert result["caught"] == pytest.approx(2 / 3)
+    assert result["cost"] == pytest.approx(2 * 1 + 1 * 1)
+    assert result["cost_flag_none"] == pytest.approx(2 * 3)
+
+
+def test_apply_threshold_agrees_with_cost_threshold():
+    t, cost = cost_threshold(Y, P, cost_fn=2, cost_fp=1)
+    assert apply_threshold(Y, P, t, cost_fn=2, cost_fp=1)["cost"] == pytest.approx(cost)

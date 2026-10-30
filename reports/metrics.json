@@ -43,78 +43,116 @@
    }
   }
  },
- "thresholds": [
+ "thresholds_lightgbm_bayes": [
+  {
+   "cost_fn:cost_fp": "10:1",
+   "threshold": 0.09090909090909091,
+   "flagged": 0.00035319113710990317,
+   "caught": 0.007272727272727273,
+   "cost": 5520,
+   "cost_flag_none": 5500,
+   "cost cut vs flag none": -0.0036363636363636598
+  },
+  {
+   "cost_fn:cost_fp": "25:1",
+   "threshold": 0.038461538461538464,
+   "flagged": 0.004707375624292928,
+   "caught": 0.03636363636363636,
+   "cost": 14083,
+   "cost_flag_none": 13750,
+   "cost cut vs flag none": -0.024218181818181916
+  },
+  {
+   "cost_fn:cost_fp": "100:1",
+   "threshold": 0.009900990099009901,
+   "flagged": 0.06893849507463921,
+   "caught": 0.3927272727272727,
+   "cost": 45676,
+   "cost_flag_none": 55000,
+   "cost cut vs flag none": 0.16952727272727275
+  }
+ ],
+ "thresholds_upper_bound_on_test": [
   {
    "cost_fn:cost_fp": "10:1",
    "model": "logistic",
    "threshold": Infinity,
    "flagged": 0.0,
-   "defaults caught": 0.0,
-   "total cost": 5500.0
+   "caught": 0.0,
+   "cost": 5500,
+   "cost_flag_none": 5500
   },
   {
    "cost_fn:cost_fp": "10:1",
    "model": "random_forest",
-   "threshold": 0.8084660465634472,
+   "threshold": 0.8084660465634473,
    "flagged": 8.277917276013355e-05,
-   "defaults caught": 0.0036363636363636364,
-   "total cost": 5493.0
+   "caught": 0.0036363636363636364,
+   "cost": 5493,
+   "cost_flag_none": 5500
   },
   {
    "cost_fn:cost_fp": "10:1",
    "model": "lightgbm",
    "threshold": Infinity,
    "flagged": 0.0,
-   "defaults caught": 0.0,
-   "total cost": 5500.0
+   "caught": 0.0,
+   "cost": 5500,
+   "cost_flag_none": 5500
   },
   {
    "cost_fn:cost_fp": "25:1",
    "model": "logistic",
    "threshold": 0.9745979472342353,
    "flagged": 0.004817747854639773,
-   "defaults caught": 0.07454545454545454,
-   "total cost": 13557.0
+   "caught": 0.07454545454545454,
+   "cost": 13557,
+   "cost_flag_none": 13750
   },
   {
    "cost_fn:cost_fp": "25:1",
    "model": "random_forest",
-   "threshold": 0.731376513944474,
+   "threshold": 0.7313765139444742,
    "flagged": 0.0013134295411274524,
-   "defaults caught": 0.023636363636363636,
-   "total cost": 13650.0
+   "caught": 0.023636363636363636,
+   "cost": 13650,
+   "cost_flag_none": 13750
   },
   {
    "cost_fn:cost_fp": "25:1",
    "model": "lightgbm",
    "threshold": 0.07020693608129824,
    "flagged": 0.0007891614469799399,
-   "defaults caught": 0.016363636363636365,
-   "total cost": 13659.0
+   "caught": 0.016363636363636365,
+   "cost": 13659,
+   "cost_flag_none": 13750
   },
   {
    "cost_fn:cost_fp": "100:1",
    "model": "logistic",
    "threshold": 0.8348031309417764,
    "flagged": 0.08216660688170856,
-   "defaults caught": 0.4509090909090909,
-   "total cost": 44841.0
+   "caught": 0.4509090909090909,
+   "cost": 44841,
+   "cost_flag_none": 55000
   },
   {
    "cost_fn:cost_fp": "100:1",
    "model": "random_forest",
    "threshold": 0.45774162308577204,
    "flagged": 0.06464501531414696,
-   "defaults caught": 0.36,
-   "total cost": 46716.0
+   "caught": 0.36,
+   "cost": 46716,
+   "cost_flag_none": 55000
   },
   {
    "cost_fn:cost_fp": "100:1",
    "model": "lightgbm",
    "threshold": 0.008964635972519406,
    "flagged": 0.07850224883419332,
-   "defaults caught": 0.44363636363636366,
-   "total cost": 44581.0
+   "caught": 0.44363636363636366,
+   "cost": 44581,
+   "cost_flag_none": 55000
   }
  ],
  "random_forest_oob": {

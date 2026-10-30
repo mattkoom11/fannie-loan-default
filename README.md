@@ -33,15 +33,15 @@ PR AUC no-skill baseline: 0.0030. Brier scores of the class-weighted models refl
 
 ![ROC and precision-recall curves](reports/roc_pr_curves.png)
 
-**At a realistic 100:1 cost ratio** (a defaulted loan can lose tens of thousands of dollars; a false alarm costs a review), flagging the riskiest ~8% of loans catches ~45% of defaults and cuts total cost by about 19% versus flagging none. At 10:1 the cheapest policy is to flag nobody.
+**At a realistic 100:1 cost ratio** (a defaulted loan can lose tens of thousands of dollars; a false alarm costs a review), LightGBM with the cost-implied threshold $t=1/101$ flags 6.9% of loans, catches 39% of defaults and cuts total cost by 17% versus flagging none. The threshold comes from the costs and the model's calibration, not from tuning on the 2017 loans. At 10:1 and 25:1, flagging doesn't pay. Thresholds tuned on the test loans themselves reach at most 45% caught and a 19% cut, an upper bound rather than a result.
 
 ### Findings
 
 1. **The three models tie.** A linear model, a forest and boosting reaching the same ROC AUC means the ceiling is the information in origination data, not model flexibility.
 2. **Credit score dominates.** Borrowers at 620–679 default at 1.10% versus 0.077% at 740+. It is the top input by permutation importance (0.113 AUC drop), well ahead of state (0.032) and DTI (0.013).
-3. **The flexible models lean more on the hurricanes:** they lose 0.008 AUC without Florida and Texas, against 0.005 for logistic regression, and rank `STATE` second.
-4. **Only LightGBM is calibrated.** Trained without class weights, its scores track observed default rates; the weighted models only rank.
-5. **Drift:** the forest's out-of-bag AUC on 2015–2016 loans is 0.860, and LightGBM's 2016Q4 validation AUC is 0.883, against 0.832 on 2017 loans.
+3. **The flexible models lean more on the hurricanes:** they lose 0.007–0.008 AUC without Florida and Texas, against 0.005 for logistic regression, and rank `STATE` second.
+4. **Only LightGBM is calibrated.** Trained without class weights, its scores track observed default rates, which is what lets its decision threshold be set from costs alone. The weighted models only rank.
+5. **Drift:** the forest's out-of-bag AUC on 2015–2016 loans is 0.859, against 0.832 on 2017 loans.
 
 ## Limitations
 
