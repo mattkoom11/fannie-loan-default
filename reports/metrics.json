@@ -1,0 +1,148 @@
+{
+ "metrics": {
+  "logistic": {
+   "all": {
+    "roc_auc": 0.8324416856841644,
+    "pr_auc": 0.017368302994281774,
+    "brier": 0.20685917194372397,
+    "base_rate": 0.00303523633453823
+   },
+   "excl_storm_states": {
+    "roc_auc": 0.8276399386931564,
+    "pr_auc": 0.0108027233933853,
+    "brier": 0.16519328525413823,
+    "base_rate": 0.002280849957762038
+   }
+  },
+  "random_forest": {
+   "all": {
+    "roc_auc": 0.831555536545047,
+    "pr_auc": 0.01640923289622443,
+    "brier": 0.047193701698914084,
+    "base_rate": 0.00303523633453823
+   },
+   "excl_storm_states": {
+    "roc_auc": 0.8238350644840201,
+    "pr_auc": 0.009875000269901605,
+    "brier": 0.03858491722603639,
+    "base_rate": 0.002280849957762038
+   }
+  },
+  "lightgbm": {
+   "all": {
+    "roc_auc": 0.8316183181906246,
+    "pr_auc": 0.015925382243102894,
+    "brier": 0.0030106293334151994,
+    "base_rate": 0.00303523633453823
+   },
+   "excl_storm_states": {
+    "roc_auc": 0.8242744231450685,
+    "pr_auc": 0.010517140343264012,
+    "brier": 0.0022739980312397453,
+    "base_rate": 0.002280849957762038
+   }
+  }
+ },
+ "thresholds": [
+  {
+   "cost_fn:cost_fp": "10:1",
+   "model": "logistic",
+   "threshold": Infinity,
+   "flagged": 0.0,
+   "defaults caught": 0.0,
+   "total cost": 5500.0
+  },
+  {
+   "cost_fn:cost_fp": "10:1",
+   "model": "random_forest",
+   "threshold": 0.8084660465634472,
+   "flagged": 8.277917276013355e-05,
+   "defaults caught": 0.0036363636363636364,
+   "total cost": 5493.0
+  },
+  {
+   "cost_fn:cost_fp": "10:1",
+   "model": "lightgbm",
+   "threshold": Infinity,
+   "flagged": 0.0,
+   "defaults caught": 0.0,
+   "total cost": 5500.0
+  },
+  {
+   "cost_fn:cost_fp": "25:1",
+   "model": "logistic",
+   "threshold": 0.9745979472342353,
+   "flagged": 0.004817747854639773,
+   "defaults caught": 0.07454545454545454,
+   "total cost": 13557.0
+  },
+  {
+   "cost_fn:cost_fp": "25:1",
+   "model": "random_forest",
+   "threshold": 0.731376513944474,
+   "flagged": 0.0013134295411274524,
+   "defaults caught": 0.023636363636363636,
+   "total cost": 13650.0
+  },
+  {
+   "cost_fn:cost_fp": "25:1",
+   "model": "lightgbm",
+   "threshold": 0.07020693608129824,
+   "flagged": 0.0007891614469799399,
+   "defaults caught": 0.016363636363636365,
+   "total cost": 13659.0
+  },
+  {
+   "cost_fn:cost_fp": "100:1",
+   "model": "logistic",
+   "threshold": 0.8348031309417764,
+   "flagged": 0.08216660688170856,
+   "defaults caught": 0.4509090909090909,
+   "total cost": 44841.0
+  },
+  {
+   "cost_fn:cost_fp": "100:1",
+   "model": "random_forest",
+   "threshold": 0.45774162308577204,
+   "flagged": 0.06464501531414696,
+   "defaults caught": 0.36,
+   "total cost": 46716.0
+  },
+  {
+   "cost_fn:cost_fp": "100:1",
+   "model": "lightgbm",
+   "threshold": 0.008964635972519406,
+   "flagged": 0.07850224883419332,
+   "defaults caught": 0.44363636363636366,
+   "total cost": 44581.0
+  }
+ ],
+ "random_forest_oob": {
+  "roc_auc": 0.8594982960538117,
+  "pr_auc": 0.01207748085124287,
+  "brier": 0.033262752385166856,
+  "base_rate": 0.0021298143171905423
+ },
+ "lightgbm_trees": 229,
+ "lightgbm_importance": {
+  "CSCORE_B": 0.11343,
+  "STATE": 0.03159,
+  "DTI": 0.01292,
+  "NUM_BO": 0.01265,
+  "ORIG_RATE": 0.00987,
+  "OLTV": 0.00732,
+  "CSCORE_C": 0.00631,
+  "ORIG_UPB": 0.00606,
+  "PURPOSE": 0.00461,
+  "OCLTV": 0.00311,
+  "OCC_STAT": 0.00205,
+  "PROP": 0.00203,
+  "MI_PCT": 0.00128,
+  "CHANNEL": 0.00058,
+  "ORIG_TERM": 0.00046,
+  "FIRST_FLAG": 0.00025,
+  "NO_UNITS": -0.00031
+ },
+ "n_train": 421633,
+ "n_test": 181205
+}
