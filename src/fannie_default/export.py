@@ -18,6 +18,7 @@ from fannie_default.vintage import add_bands, default_rate_by
 
 SEED = 42
 AUC_TOLERANCE = 0.002  # per-model test ROC AUC vs reports/metrics.json
+BRIER_TOLERANCE = 0.0005  # per-model test Brier (all rows) vs reports/metrics.json
 RATE_TOLERANCE = 0.005  # flagged / caught share at 100:1 vs reports/metrics.json
 VALIDATION_VINTAGE = "2016Q4"  # LightGBM early-stopping slice, as in notebook 02
 
@@ -195,6 +196,11 @@ def check_reproduction(dash: dict, metrics: dict) -> list[str]:
             got = dash["metrics"][name][subset]["roc_auc"]
             if abs(got - ref["roc_auc"]) > AUC_TOLERANCE:
                 problems.append(f"{name} {subset} ROC AUC {got:.4f} vs reference {ref['roc_auc']:.4f} (tolerance {AUC_TOLERANCE})")
+    for name, by_subset in metrics["metrics"].items():
+        got = dash["metrics"][name]["all"]["brier"]
+        ref_brier = by_subset["all"]["brier"]
+        if abs(got - ref_brier) > BRIER_TOLERANCE:
+            problems.append(f"{name} all Brier {got:.5f} vs reference {ref_brier:.5f} (tolerance {BRIER_TOLERANCE})")
     ref = next(r for r in metrics["thresholds_lightgbm_bayes"] if r["cost_fn:cost_fp"] == "100:1")
     got = next(pt for pt in dash["cost_curve"] if pt["ratio"] == 100.0)
     for key in ("flagged", "caught"):

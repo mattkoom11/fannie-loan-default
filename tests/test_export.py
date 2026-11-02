@@ -12,6 +12,7 @@ from fannie_default.export import (
     cost_curve,
     cost_ratios,
     group_rates,
+    main,
     seed_from_metrics,
 )
 
@@ -94,3 +95,31 @@ def test_check_reproduction_flags_drift():
     assert check_reproduction(dash, metrics) == []
     dash["metrics"]["lightgbm"]["all"]["roc_auc"] += 0.003
     assert any("lightgbm" in m for m in check_reproduction(dash, metrics))
+
+
+def test_check_reproduction_flags_brier_drift():
+    metrics = json.loads(Path("reports/metrics.json").read_text())
+    dash = seed_from_metrics(metrics, git_sha="x")
+    dash["metrics"]["random_forest"]["all"]["brier"] += 0.001
+    msgs = check_reproduction(dash, metrics)
+    assert len(msgs) == 1 and "random_forest" in msgs[0] and "Brier" in msgs[0]
+
+
+def test_main_fails_and_writes_nothing_on_drift(tmp_path, monkeypatch, capsys):
+    real = json.loads(Path("reports/metrics.json").read_text())
+    doctored = json.loads(json.dumps(real))
+    for by_subset in doctored["metrics"].values():
+        for ref in by_subset.values():
+            ref["roc_auc"] += 0.01
+    metrics_path = tmp_path / "metrics.json"
+    metrics_path.write_text(json.dumps(doctored))
+    loans_path = tmp_path / "loans.parquet"
+    loans_path.write_bytes(b"")
+    monkeypatch.setattr("fannie_default.export.pd.read_parquet", lambda _p: None)
+    monkeypatch.setattr("fannie_default.export.build_dashboard", lambda _df, _sha: seed_from_metrics(real, "x"))
+    monkeypatch.setattr("fannie_default.export._git_sha", lambda: "x")
+    out = tmp_path / "dash.json"
+    code = main(["--out", str(out), "--metrics", str(metrics_path), "--loans", str(loans_path)])
+    assert code == 1
+    assert not out.exists()
+    assert "ROC AUC" in capsys.readouterr().err
