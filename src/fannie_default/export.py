@@ -38,13 +38,18 @@ def cost_curve(y, p, ratios: list[float]) -> list[dict]:
     return rows
 
 
-def calibration_bins(y, p, n_bins: int = 10) -> list[dict]:
-    """Mean predicted vs observed default rate in quantile bins of the score."""
+def calibration_bins(y, p, n_bins: int = 10, min_loans: int = MIN_LOANS) -> list[dict]:
+    """Mean predicted vs observed default rate in quantile bins of the score; bins under min_loans carry no values."""
     frame = pd.DataFrame({"y": np.asarray(y), "p": np.asarray(p)})
     frame["bin"] = pd.qcut(frame["p"], n_bins, duplicates="drop")
     g = frame.groupby("bin", observed=True).agg(mean_predicted=("p", "mean"), observed=("y", "mean"), loans=("y", "size"))
     return [
-        {"mean_predicted": float(r.mean_predicted), "observed": float(r.observed), "loans": int(r.loans)}
+        {
+            "mean_predicted": None if r.loans < min_loans else float(r.mean_predicted),
+            "observed": None if r.loans < min_loans else float(r.observed),
+            "loans": int(r.loans),
+            "suppressed": bool(r.loans < min_loans),
+        }
         for r in g.itertuples()
     ]
 
