@@ -1,9 +1,19 @@
 import json
+from pathlib import Path
 
 import numpy as np
 import pytest
 
-from fannie_default.export import add_region, calibration_bins, cost_curve, cost_ratios, group_rates
+from fannie_default.export import (
+    add_region,
+    build_dashboard,
+    calibration_bins,
+    check_reproduction,
+    cost_curve,
+    cost_ratios,
+    group_rates,
+    seed_from_metrics,
+)
 
 
 def test_cost_ratios_hits_the_marked_ratios():
@@ -52,3 +62,35 @@ def test_group_rates_keeps_large_cells(loans):
     rows = group_rates(add_region(loans), ["region"], min_loans=1)
     assert {r["region"] for r in rows} == {"TX", "rest of US"}
     assert sum(r["loans"] for r in rows) == len(loans)
+
+
+def test_build_dashboard_shape_and_valid_json(loans):
+    dash = build_dashboard(loans, git_sha="abc123")
+    assert set(dash) == {"summary", "metrics", "random_forest_oob", "cost_curve", "calibration",
+                         "vintage_region", "fico_ltv", "importance", "meta"}
+    assert set(dash["metrics"]) == {"logistic", "random_forest", "lightgbm"}
+    assert any(pt["ratio"] == 100.0 for pt in dash["cost_curve"])
+    json.dumps(dash, allow_nan=False)
+
+
+def test_build_dashboard_has_no_loan_ids(loans):
+    text = json.dumps(build_dashboard(loans, git_sha="x"))
+    assert not any(lid in text for lid in loans["LOAN_ID"].head(50))
+
+
+def test_seed_from_real_metrics():
+    metrics = json.loads(Path("reports/metrics.json").read_text())
+    seed = seed_from_metrics(metrics, git_sha="x")
+    assert [pt["ratio"] for pt in seed["cost_curve"]] == [10.0, 25.0, 100.0]
+    hundred = seed["cost_curve"][2]
+    assert hundred["flagged"] == pytest.approx(0.0689, abs=1e-4) and hundred["caught"] == pytest.approx(0.3927, abs=1e-4)
+    assert seed["calibration"] is None and seed["meta"]["source"] == "seed"
+    json.dumps(seed, allow_nan=False)
+
+
+def test_check_reproduction_flags_drift():
+    metrics = json.loads(Path("reports/metrics.json").read_text())
+    dash = seed_from_metrics(metrics, git_sha="x")
+    assert check_reproduction(dash, metrics) == []
+    dash["metrics"]["lightgbm"]["all"]["roc_auc"] += 0.003
+    assert any("lightgbm" in m for m in check_reproduction(dash, metrics))
