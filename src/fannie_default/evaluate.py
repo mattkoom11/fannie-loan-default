@@ -60,6 +60,28 @@ def cost_threshold(y, p, cost_fn: float, cost_fp: float) -> tuple[float, float]:
     return float(candidates[best]), float(cost[best])
 
 
+def bayes_threshold(cost_fn: float, cost_fp: float) -> float:
+    """Cost-optimal threshold for calibrated probabilities: flag when the expected cost
+    of a miss, p*cost_fn, exceeds that of a false alarm, (1-p)*cost_fp. Needs no tuning,
+    so it can be applied to test data without selecting on it."""
+    return cost_fp / (cost_fp + cost_fn)
+
+
+def apply_threshold(y, p, threshold: float, cost_fn: float, cost_fp: float) -> dict:
+    """Outcome of flagging loans with p >= threshold: share flagged, share of defaults
+    caught, total cost, and the cost of flagging no one for comparison."""
+    y, p = np.asarray(y), np.asarray(p)
+    flagged = p >= threshold
+    fn = int(((~flagged) & (y == 1)).sum())
+    fp = int((flagged & (y == 0)).sum())
+    return {
+        "flagged": float(flagged.mean()),
+        "caught": float((flagged & (y == 1)).sum() / y.sum()),
+        "cost": cost_fn * fn + cost_fp * fp,
+        "cost_flag_none": cost_fn * int(y.sum()),
+    }
+
+
 def importance(model, X: pd.DataFrame, y, n_repeats: int = 5) -> pd.Series:
     """Mean drop in ROC AUC when each input column is shuffled, largest first."""
     result = permutation_importance(model, X, y, scoring="roc_auc", n_repeats=n_repeats, random_state=42, n_jobs=-1)

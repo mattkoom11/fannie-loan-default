@@ -1,5 +1,8 @@
 """Model factories. Each returns an unfitted pipeline that takes the raw X from out_of_time_split."""
 
+import lightgbm
+import numpy as np
+from lightgbm import LGBMClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
@@ -32,3 +35,44 @@ def random_forest() -> Pipeline:
             random_state=42,
         )),
     ])
+
+
+def boosting() -> Pipeline:
+    # Many shallow trees, each fit to the current model's errors and added at a 0.03
+    # learning rate. Row (subsample) and column (colsample_bytree) sampling decorrelate
+    # the trees like a forest's bootstrap does. n_estimators is a ceiling; fit with
+    # fit_early_stopped to pick the actual number of trees.
+    return Pipeline([
+        ("pre", make_preprocessor(scale=False)),
+        ("clf", LGBMClassifier(
+            n_estimators=2000,
+            learning_rate=0.03,
+            num_leaves=31,
+            min_child_samples=200,
+            subsample=0.8,
+            subsample_freq=1,
+            colsample_bytree=0.8,
+            metric="auc",
+            random_state=42,
+            verbose=-1,
+        )),
+    ])
+
+
+def fit_early_stopped(model: Pipeline, X, y, valid: np.ndarray, patience: int = 100) -> Pipeline:
+    """Fit a boosting pipeline on the rows outside `valid`, stopping once validation
+    AUC has not improved for `patience` trees; predictions then use the best tree count.
+
+    The validation rows are held out of both the preprocessor and the trees.
+    """
+    valid = np.asarray(valid, dtype=bool)
+    y = np.asarray(y)
+    pre, clf = model["pre"], model[-1]
+    X_fit = pre.fit_transform(X[~valid])
+    X_valid = pre.transform(X[valid])
+    clf.fit(
+        X_fit, y[~valid],
+        eval_X=X_valid, eval_y=y[valid],
+        callbacks=[lightgbm.early_stopping(patience, verbose=False)],
+    )
+    return model
