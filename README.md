@@ -62,6 +62,19 @@ cd notebooks && uv run jupyter nbconvert --to notebook --execute --inplace 01_vi
 
 The build takes about 11 minutes and 3 GB of memory; the comparison notebook takes a few minutes.
 
+### Dashboard export
+
+`fannie_default.export` writes the aggregates-only JSON behind the portfolio dashboard (no loan rows, IDs or per-loan scores; groups under 30 loans carry no rate).
+
+```bash
+# seed from the committed reports/metrics.json (no data needed)
+uv run python -m fannie_default.export --seed --out ../matthew-kim-portfolio/src/lib/mortgage-default.json
+# full export: refit all three models on data/processed/loans.parquet
+uv run python -m fannie_default.export --out ../matthew-kim-portfolio/src/lib/mortgage-default.json
+```
+
+The full export checks its refit against `reports/metrics.json` (test ROC AUC within 0.002 per model, 100:1 flagged and caught within 0.005). Exit 1 means a check failed: each breach is printed and nothing is written, so investigate the drift before publishing.
+
 ## Layout
 
 ```
